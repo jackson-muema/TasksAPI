@@ -28,4 +28,13 @@ div.tasks-panel {
 table tr.done {
     text-decoration: line-through;
     color: #888;
+   
+}
+
+body {
+    background-image: url('/images/anonymous.jpg');
+    background-size: cover; /* Adjust the background image to cover the entire page */
+    background-repeat: no-repeat; /* Prevent the background image from repeating */
+    background-position: center; /* Center the background image */
+    background-attachment: fixed; /* Keep the background image fixed when scrolling */
 }

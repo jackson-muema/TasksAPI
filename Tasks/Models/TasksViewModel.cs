@@ -4,6 +4,6 @@ namespace Tasks.Models
 {
     public class TasksViewModel
     {
-        public TasksModel[] Items { get; set; }
+        public List<TasksDTO> Item {  get; set; }
     }
 }

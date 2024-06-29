@@ -7,27 +7,34 @@ using Tasks.Data;
 using Tasks.Models;
 using Tasks.Services;
 using Microsoft.EntityFrameworkCore;
+using AutoMapper;
 
 namespace Tasks.Services
 {
     public class TasksItemService : ITasksItemService
     {
         private readonly ApplicationDbContext _context;
-        public TasksItemService(ApplicationDbContext context)
+
+        private readonly IMapper _mapper;
+        public TasksItemService(ApplicationDbContext context, IMapper mapper)
         {
 
             _context = context;
+            _mapper = mapper;
 
         }
-        public async Task<TasksModel[]> GetIncompleteItemsAsync()
+        public async Task<List<TasksDTO>> GetIncompleteItemsAsync()
         {
-            return await _context.Items
+              var items = await _context.Items
                 .Where(x => x.IsDone == false)
-                .ToArrayAsync();
+                .ToListAsync();
+            return _mapper.Map<List<TasksDTO>>(items);
         }
 
-        public async Task<bool> AddItemsAsync(TasksModel tasksModel)
+        public async Task<bool> AddItemsAsync(TasksDTO tasksDTO)
         {
+            var tasksModel = _mapper.Map<TasksModel>(tasksDTO);
+
             tasksModel.Id = Guid.NewGuid();
 
             tasksModel.IsDone = false;
@@ -57,4 +64,6 @@ namespace Tasks.Services
 
         }
     }
+
+ 
 }

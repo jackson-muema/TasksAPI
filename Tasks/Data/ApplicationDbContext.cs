@@ -11,4 +11,6 @@ public class ApplicationDbContext : IdentityDbContext
     {
     }
     public DbSet<TasksModel> Items { get; set; }
+
+    public DbSet<TasksDTO> Item {  get; set; }
 }

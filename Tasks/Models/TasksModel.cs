@@ -10,7 +10,7 @@ namespace Tasks.Models
         public bool IsDone { get; set; }
 
         [Required]
-        public string Title { get; set; }
+        public string? Title { get; set; }
 
         public DateTimeOffset? DueAt { get; set; }
     }

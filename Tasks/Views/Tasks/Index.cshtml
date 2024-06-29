@@ -19,7 +19,7 @@
             </tr>
         </thead>
 
-        @foreach (var item in Model.Items)//recall this from viewmodel
+        @foreach (var item in Model.Item)//recall this from viewmodel
         {
             <tr>
                 <td>
@@ -37,7 +37,7 @@
 
     </table>
     <div class="panel-footer add-item-form">
-        @await Html.PartialAsync("AddItemPartial", new TasksModel())
+        @await Html.PartialAsync("AddItemPartial", new TasksDTO())
     </div>
 
 </div>

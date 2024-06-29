@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Tasks.Models;
 using Tasks.Services;
+using AutoMapper;
 
 namespace Tasks.Controllers
 {
@@ -12,28 +14,36 @@ namespace Tasks.Controllers
     {
         private readonly ITasksItemService _tasksItemService;
 
-        public TasksController(ITasksItemService tasksItemService) 
+        private readonly IMapper _mapper;
+
+
+        public TasksController(ITasksItemService tasksItemService, IMapper mapper) 
         { 
            _tasksItemService = tasksItemService;
+            _mapper = mapper;
         }
         public async Task<IActionResult> Index()
         {
             var items = await _tasksItemService.GetIncompleteItemsAsync();
 
-            var model = new TasksViewModel { Items = items };
-            return View(model);
+            var tasksViewModel = new TasksViewModel
+            {
+                Item = items
+            };
+            
+            return View(tasksViewModel);
         }
 
         [ValidateAntiForgeryToken]
 
-        public async Task<IActionResult> AddItem(TasksModel tasksModel)
+        public async Task<IActionResult> AddItem(TasksDTO tasksDTO)
         {
             if (!ModelState.IsValid)
             {
                 return RedirectToAction("Index");
             }
 
-            var successful = await _tasksItemService.AddItemsAsync(tasksModel);
+            var successful = await _tasksItemService.AddItemsAsync(tasksDTO);
 
             if (!successful)
             {

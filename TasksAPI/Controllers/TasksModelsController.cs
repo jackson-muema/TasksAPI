@@ -22,14 +22,18 @@ namespace TasksAPI.Controllers
 
         // GET: api/TasksModels
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<TasksModel>>> GetTaskItems()
+        public async Task<ActionResult<IEnumerable<TasksDTO>>> GetTaskItems()
         {
-            return await _context.TaskItems.ToListAsync();
+            return await _context.TaskItems
+                //Project each TaskItem entity into a TasksItem DTO
+                .Select(x => TasksToDTO(x))
+                .ToListAsync();
         }
 
         // GET: api/TasksModels/5  
+        // <snippet_GetByID>
         [HttpGet("{id}")]
-        public async Task<ActionResult<TasksModel>> GetTasksModel(int id)
+        public async Task<ActionResult<TasksDTO>> GetTasksModel(int id)
         {
             var tasksModel = await _context.TaskItems.FindAsync(id);
 
@@ -38,36 +42,40 @@ namespace TasksAPI.Controllers
                 return NotFound();
             }
 
-            return tasksModel;
+            return TasksToDTO(tasksModel);
         }
 
 
         // PUT: api/TasksModels/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutTasksModel(int id, TasksModel tasksModel)
+        public async Task<IActionResult> PutTasksModel(int id, TasksDTO tasksDTO)
         {
-            if (id != tasksModel.Id)
+            if (id != tasksDTO.Id)
             {
                 return BadRequest();
             }
+            var tasksModel = await _context.TaskItems.FindAsync(id);
+            if (tasksModel == null)
+            {
+                return NotFound();
+            }
 
-            _context.Entry(tasksModel).State = EntityState.Modified;
+           tasksModel.Name = tasksDTO.Name;
+
+            tasksModel.IsComplete = tasksDTO.IsComplete;
 
             try
             {
                 await _context.SaveChangesAsync();
             }
-            catch (DbUpdateConcurrencyException)
+            catch (DbUpdateConcurrencyException) when(!TasksModelExists(id))
             {
-                if (!TasksModelExists(id))
+               
                 {
                     return NotFound();
                 }
-                else
-                {
-                    throw;
-                }
+              
             }
 
             return NoContent();
@@ -76,13 +84,19 @@ namespace TasksAPI.Controllers
         // POST: api/TasksModels
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<TasksModel>> PostTasksModel(TasksModel tasksModel)
+        public async Task<ActionResult<TasksDTO>> PostTasksModel(TasksDTO tasksDTO)
         {
+            var tasksModel = new TasksModel
+            {
+                IsComplete = tasksDTO.IsComplete,
+                Name = tasksDTO.Name,
+            };
+
             _context.TaskItems.Add(tasksModel);
             await _context.SaveChangesAsync();
 
             //return CreatedAtAction("GetTasksModel", new { id = tasksModel.Id }, tasksModel);
-            return CreatedAtAction(nameof(PostTasksModel), new { id = tasksModel.Id }, tasksModel);
+            return CreatedAtAction(nameof(PostTasksModel), new { id = tasksModel.Id }, TasksToDTO (tasksModel));
         }
 
         // DELETE: api/TasksModels/5
@@ -105,5 +119,16 @@ namespace TasksAPI.Controllers
         {
             return _context.TaskItems.Any(e => e.Id == id);
         }
+
+        //Create an helper method to convert the TasksModel in to a DTO
+        private static TasksDTO TasksToDTO(TasksModel tasksModel) =>
+            new TasksDTO
+            {
+                Id = tasksModel.Id,
+
+                Name = tasksModel.Name,
+
+                IsComplete = tasksModel.IsComplete,
+            };
     }
 }

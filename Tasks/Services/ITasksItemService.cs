@@ -7,9 +7,9 @@ namespace Tasks.Services
 {
     public interface ITasksItemService
     {
-        Task<TasksModel[]> GetIncompleteItemsAsync();
-
-        Task<bool> AddItemsAsync(TasksModel tasksModel);
+        //Task<TasksModel[]> GetIncompleteItemsAsync();
+        Task<List<TasksDTO>> GetIncompleteItemsAsync();
+        Task<bool> AddItemsAsync(TasksDTO tasksDTO);
 
         Task<bool> MarkDoneAsync(Guid id);
         

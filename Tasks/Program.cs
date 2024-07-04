@@ -4,6 +4,8 @@ using Tasks.Data;
 using Tasks.Services;
 using AutoMapper;
 using Microsoft.Extensions.DependencyInjection;
+using Tasks.Controllers;
+using Tasks.Data.Migrations;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,10 +19,14 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<ApplicationDbContext>();
+
+
+
 builder.Services.AddControllersWithViews();
 
 //Register the service with the DI container
 builder.Services.AddScoped<ITasksItemService, TasksItemService>();
+builder.Services.AddScoped<UserManager<IdentityUser>>();
 builder.Services.AddMvc();
 
 

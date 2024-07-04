@@ -7,24 +7,36 @@ using Microsoft.AspNetCore.Mvc;
 using Tasks.Models;
 using Tasks.Services;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 
 namespace Tasks.Controllers
 {
+    [Authorize]
     public class TasksController : Controller
     {
         private readonly ITasksItemService _tasksItemService;
 
         private readonly IMapper _mapper;
 
+        private readonly UserManager<IdentityUser> _userManager;
 
-        public TasksController(ITasksItemService tasksItemService, IMapper mapper) 
+        public TasksController(ITasksItemService tasksItemService, IMapper mapper, UserManager<IdentityUser> userManager) 
         { 
            _tasksItemService = tasksItemService;
             _mapper = mapper;
+            _userManager = userManager; 
+            
         }
         public async Task<IActionResult> Index()
         {
-            var items = await _tasksItemService.GetIncompleteItemsAsync();
+            var currentuser = await _userManager.GetUserAsync(User);
+
+            if (currentuser == null)
+            {
+                return Challenge();
+            }
+            var items = await _tasksItemService.GetIncompleteItemsAsync(currentuser);
 
             var tasksViewModel = new TasksViewModel
             {
@@ -42,8 +54,13 @@ namespace Tasks.Controllers
             {
                 return RedirectToAction("Index");
             }
+            var currentuser = await _userManager.GetUserAsync(User);
 
-            var successful = await _tasksItemService.AddItemsAsync(tasksDTO);
+            if (currentuser == null)
+            {
+                return Challenge();
+            }
+            var successful = await _tasksItemService.AddItemsAsync(tasksDTO, currentuser);
 
             if (!successful)
             {
@@ -61,8 +78,13 @@ namespace Tasks.Controllers
             {
                 return RedirectToAction("Index");
             }
+            var currentuser = await _userManager.GetUserAsync(User);
 
-            var successful = await _tasksItemService.MarkDoneAsync(id);
+            if (currentuser == null)
+            {
+                return Challenge();
+            }
+            var successful = await _tasksItemService.MarkDoneAsync(id, currentuser);
 
             if (!successful)
             {

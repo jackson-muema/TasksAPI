@@ -1,17 +1,19 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Identity;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Tasks.Controllers;
 using Tasks.Models;
 
 namespace Tasks.Services
 {
     public interface ITasksItemService
     {
-        //Task<TasksModel[]> GetIncompleteItemsAsync();
-        Task<List<TasksDTO>> GetIncompleteItemsAsync();
-        Task<bool> AddItemsAsync(TasksDTO tasksDTO);
 
-        Task<bool> MarkDoneAsync(Guid id);
+        Task<List<TasksDTO>> GetIncompleteItemsAsync(IdentityUser user);
+        Task<bool> AddItemsAsync(TasksDTO tasksDTO, IdentityUser user);
+
+        Task<bool> MarkDoneAsync(Guid id, IdentityUser user);
         
     }
 }

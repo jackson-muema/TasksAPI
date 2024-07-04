@@ -8,6 +8,8 @@ using Tasks.Models;
 using Tasks.Services;
 using Microsoft.EntityFrameworkCore;
 using AutoMapper;
+using Tasks.Controllers;
+using Microsoft.AspNetCore.Identity;
 
 namespace Tasks.Services
 {
@@ -16,28 +18,35 @@ namespace Tasks.Services
         private readonly ApplicationDbContext _context;
 
         private readonly IMapper _mapper;
-        public TasksItemService(ApplicationDbContext context, IMapper mapper)
+
+        private readonly UserManager<IdentityUser> _userManager;
+
+        public TasksItemService(ApplicationDbContext context, IMapper mapper, UserManager<IdentityUser> userManager)
         {
 
             _context = context;
             _mapper = mapper;
+            _userManager = userManager;
+
 
         }
-        public async Task<List<TasksDTO>> GetIncompleteItemsAsync()
+        public async Task<List<TasksDTO>> GetIncompleteItemsAsync(IdentityUser user)
         {
               var items = await _context.Items
-                .Where(x => x.IsDone == false)
-                .ToListAsync();
+                .Where(x => x.IsDone == false && x.UserId == user.Id)
+                .ToArrayAsync();
             return _mapper.Map<List<TasksDTO>>(items);
         }
 
-        public async Task<bool> AddItemsAsync(TasksDTO tasksDTO)
+        public async Task<bool> AddItemsAsync(TasksDTO tasksDTO, IdentityUser user)
         {
             var tasksModel = _mapper.Map<TasksModel>(tasksDTO);
 
-            tasksModel.Id = Guid.NewGuid();
+            /*tasksModel.Id = Guid.NewGuid();
 
-            tasksModel.IsDone = false;
+            tasksModel.IsDone = false;*/
+
+            tasksModel.UserId = user.Id;
 
             tasksModel.DueAt = DateTime.Now.AddDays(3);
 
@@ -48,10 +57,10 @@ namespace Tasks.Services
             return (saveResult) == 1;
         }
 
-        public async Task<bool> MarkDoneAsync(Guid id)
+        public async Task<bool> MarkDoneAsync(Guid id, IdentityUser user)
         {
             var item = await _context.Items
-                .Where(x => x.Id == id)
+                .Where(x => x.Id == id && x.UserId == user.Id)
                 .SingleOrDefaultAsync();
 
             if (item == null) return false;
